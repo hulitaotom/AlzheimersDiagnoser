@@ -1,0 +1,17 @@
+We are building a test-bot for Alzheimer's disease. 
+
+Press the start button to begin the test. 
+When you see the initial greeting text, just type anything, i.e. hello. 
+Then follow the instruction to input your name, gender and age. 
+The test will then begin. 
+You could type in anything as answer (they will be treated as wrong answers)
+
+Here is the correct answer for your reference: 
+Picture recognition type: 1. volcano 2. funnel 3. apple
+Math Type: 1. 7   2. 2.45   3. 11
+Memory Test: simply re-type the sentence
+President of US: Donald Trump / Trump
+Currency name: any currency name you could think of i.e. RMB, USD, HKD
+
+for the picture recognition type problem and math problem, if you answer is wrong, you will be asked to do a similar problem for at most twice. 
+if your answer is correct, then the test will continue to the next type of problem. 

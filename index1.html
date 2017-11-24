@@ -1,0 +1,359 @@
+<html>
+<head>
+ <title>Your Test Result</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="jquery-3.2.1.min.js"></script>
+ <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="Chart.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+ <style type="text/css">
+  body { width: 500px; margin: 0 auto; text-align: center; margin-top: 20px; }
+  div {  position: absolute; }
+  input { width: 400px; }
+  button { width: 50px; }
+  textarea { width: 100%; }
+   tab { padding-left: 3em; }
+
+   .button {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #f4511e;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 20px;
+  padding: 20px;
+  width: 400px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+
+ </style>
+</head>
+<body>
+ <div>
+  Test taker's information:
+  <br>
+  Name: <span id="name"></span>  <tab></tab>  Age: <span id="age"></span>    <tab></tab> Gender: <span id="gender"></span>
+  <br><br>
+  Your Overall Score is: <span id="score"></span>
+  <br><br>
+  My suggestion: <span id="suggestion"></span>
+  <br><br>
+  Average score of your age: <span id="average"></span>
+  <br><br>
+  How to interpret the test: The TYM test is part of the assessment of a patient with memory problems and the TYM score alone cannot be used as a substitute for a clinical opinion but 93% of patients with AD score 60 or less.
+  <br><br>
+  Take a look at the following charts for more informations.<span id="test"></span>
+  <br>
+  <canvas id="myChart" width="200" height="200"></canvas>
+  <br>
+  <canvas id="myChart1" width="300" height="300"></canvas>
+  <br>
+  <canvas id="myChart2" width="200" height="200"></canvas>
+  <br>
+  <center><button class="button" id="more"><span>I want to know more!</span></button></center>
+
+ </div>
+
+<script>
+var onetime=true;
+$(document).ready(function() {
+    if (onetime){
+    getData("name");
+    
+    getData("age");getData("gender");
+    
+    getChartData();
+    
+    getData("score");
+    
+    onetime=false;
+    }
+    
+    
+
+    $("#more").click(function(event){
+        window.location.href = "more_about_alzheimers.html";
+   });
+    
+
+       // $('#test').html(dat[0])
+    });
+
+function setResponse(val) {
+    val=val.substring(0, val.length-1);
+
+                //synth = window.speechSynthesis;
+                var utterThis = new SpeechSynthesisUtterance('"'+val);
+                utterThis.lang = "en-US";
+                
+                utterThis.onend = function () {
+                      
+              };
+                speechSynthesis.speak(utterThis);
+
+}
+
+
+var dataName = ["pic","math","mem","com","total_correct","total_wrong"];
+
+var ctx = $("#myChart").get(0).getContext("2d");
+var ctx1 = $("#myChart1").get(0).getContext("2d");
+var ctx2 = $("#myChart2").get(0).getContext("2d");
+
+function getData(val){
+  $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + val + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        $('#'+val).html(output);
+        
+        if (val==="name"){
+            setResponse("Hey"+output+". Your test report is ready! Please double check your personal information below.");
+        }
+        
+        if (val==="age"){
+            if (parseInt(output)<=60){
+                $('#average').html("90/100");
+            }else if(parseInt(output)<=80){
+                $('#average').html("80/100");
+            }else {
+                $('#average').html("60/100");
+            }
+        }
+
+        if (val==="score"){
+            setResponse("Your overall score is"+output+'0');
+            if ((parseInt(output))>=80){
+                $('#suggestion').html("It seems that you don't have Alzheimer, yay!");
+                setResponse("It seems that you don't have Alzheimer, yay!");
+                setResponse("If you have further questions, please click on the orange button located at the bottom of this page!");
+                setResponse("Thank you for using the ultimate Alzheimer's test! Wish you a healthy and happy life!");
+            }else if((parseInt(output))>=50){
+                 $('#suggestion').html("You are a potential Alzheimer patient, please be aware and consult a doctor.");
+                 setResponse("You are a potential Alzheimer patient, please be aware and consult a doctor.");
+                 setResponse("If you have further questions, please click on the orange button located at the bottom of this page!");
+                 setResponse("Thank you for using the ultimate Alzheimer's test! Wish you a healthy and happy life!");
+            }else{
+                 $('#suggestion').html("Unfortunately, it is likely that you have Alzheimer, please consult a doctor soon!");
+                 setResponse("Unfortunately, it is likely that you have Alzheimer, please consult a doctor soon!");
+                 setResponse("If you have further questions, please click on the orange button located at the bottom of this page!");
+                 setResponse("Thank you for using the ultimate Alzheimer's test! Wish you a healthy and happy life!");
+            }
+        }
+    })
+}
+
+function getChartData(){
+    dat=[];
+  $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[0] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[0]=(parseInt(output));
+
+         $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[1] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[1]=(parseInt(output));
+
+         $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[2] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[2]=(parseInt(output))*3;
+
+        $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[3] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[3]=(parseInt(output));
+
+        $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[4] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[4]=(parseInt(output));
+
+        $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[5] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[5]=(parseInt(output));
+
+        $.ajax( { url: "https://api.mlab.com/api/1/databases/tom/collections/" + dataName[6] + "?apiKey=Ddyladj4Ce5nXw5avRUL0woi_cbHq1pk"}
+    ).done(function(data){
+        var output ="";
+        $.each(data,function(key,data){output+=data.data;});     
+        dat[6]=(parseInt(output));
+
+        var value = {
+    labels: ["Picture Recognition", "Basic Calculation", "Memory Test", "Common-Sense Knowledge"],
+    datasets: [
+        {
+            label: "# of right answers in each type",
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1,
+            data: dat,
+        }
+    ]
+};
+
+
+var value1 = {
+    labels: ["Picture Recognition", "Basic Calculation", "Memory Test", "Common-Sense Knowledge"],
+    datasets: [
+            {
+            label: "Ability Distribution",
+            backgroundColor: "rgba(255,99,132,0.2)",
+            borderColor: "rgba(255,99,132,1)",
+            pointBackgroundColor: "rgba(255,99,132,1)",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "rgba(255,99,132,1)",
+            data: [dat[0]*10,dat[1]*10,dat[2]*10,dat[3]*10],
+        }
+        /*{
+            label: "My First dataset",
+            backgroundColor: "rgba(179,181,198,0.2)",
+            borderColor: "rgba(179,181,198,1)",
+            pointBackgroundColor: "rgba(179,181,198,1)",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "rgba(179,181,198,1)",
+            //data: [65, 59, 90, 81]
+        }*/
+
+    ]
+};
+
+
+
+
+var value2 = {
+    labels: [
+        "Total Correct",
+        "Total Incorrect"
+    ],
+    datasets: [
+        {
+            data: [dat[4], dat[5]],
+            backgroundColor: [
+                "#FF6384",
+                "#36A2EB",
+                "#FFCE56"
+            ],
+            hoverBackgroundColor: [
+                "#FF6384",
+                "#36A2EB",
+                "#FFCE56"
+            ]
+        }]
+};
+
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: value,
+    options: {
+        scales: {
+            xAxes:[{
+            
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]}]
+        }
+    }
+});
+
+var myRadarChart = new Chart(ctx1, {
+    type: 'radar',
+    data: value1,
+    options: {
+            scale: {
+                ticks: {
+                    beginAtZero: true
+                }
+            }
+    }
+});
+
+
+var myPieChart = new Chart(ctx2,{
+    type: 'pie',
+    data: value2,
+    //options: options
+    
+});
+
+    })
+
+    })
+
+    })
+
+    })
+
+    })
+
+
+    })
+
+
+    })
+}
+
+
+
+
+</script>
+
+</body>
+</html>
+
